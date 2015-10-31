@@ -18,6 +18,7 @@
 #define SHOW(...) {;}
 #define REACH_HERE {;}
 #define LOG(s, ...) {;}
+#define LOGLN(s, ...) {;}
 
 // #undef HHHDEBUG
 #ifdef HHHDEBUG

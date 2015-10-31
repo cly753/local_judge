@@ -56,9 +56,14 @@ vector<string> split_name(string name) {
 #undef LOG
 #endif
 
+#ifdef LOGLN
+#undef LOGLN
+#endif
+
 #define SHOW(...) { SHOWANY(split_name(#__VA_ARGS__), __VA_ARGS__); }
 #define REACH_HERE { cout << "REACH_HERE! line " << __LINE__ << endl; }
-#define LOG(s, ...) { printf(s, __VA_ARGS__); } 
+#define LOG(s, ...) { printf(s, ##__VA_ARGS__); } 
+#define LOGLN(s, ...) { printf(s, ##__VA_ARGS__); printf("\n"); } 
 // 
 // http://codecraft.co/2014/11/25/variadic-macros-tricks/
 // 
