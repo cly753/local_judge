@@ -396,7 +396,7 @@ def get_args():
 
 
 
-	run_parser = subparsers.add_parser("run", help="run solution")
+	run_parser = subparsers.add_parser("run", help="run solution (default)")
 
 	run_parser.add_argument("sol_name", type=str, help="run solution")
 	run_parser.add_argument("-i", type=str, nargs="+", help="specify input sources (stdin case_1.in ...)")
