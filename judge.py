@@ -4,23 +4,26 @@
 import argparse
 import sys
 import os
+import shutil
 import subprocess
-import requests
 import time
 
 
+# import requests
+# def download(url, dest):
+# 	# print("download {0} {1}".format(url, dest))
+# 	r = requests.get(url, allow_redirects=True)
+# 	with open(dest, "ab") as fdest:
+# 		fdest.write(r.content)
 
-def download(url, dest):
-	# print("download {0} {1}".format(url, dest))
-	r = requests.get(url, allow_redirects=True)
-	with open(dest, "ab") as fdest:
-		fdest.write(r.content)
+def fcopy(fpath_from, fpath_to):
+	# print("copying {0} {1}".format(fpath_from, fpath_to))
+	shutil.copyfile(fpath_from, fpath_to)
 
 
 def fdelete(fpath):
 	# print("deleting {0}".format(fpath))
-	# os.remove(sol.binary)
-	pass
+	os.remove(fpath)
 
 
 def frename(fpath_old, fpath_new):
@@ -42,13 +45,16 @@ def fexist(fpath):
 def compile_sol(sol, online_judge, standard, verbose):
 	# print("compile {0}", online_judge)
 	
-	compiler = "g++" # "g++-5"
+	compiler = "g++" # clang
+	# compiler = "g++-5" # gcc
 	standard = "-std=c++11" if standard is None else "-std={0}".format(standard)
 	optimizer = "-O2"
-	precompile_link = "" # "-I/usr/include -L/usr/lib"
-	precompile_template = "-I{0}".format(sol.template_header) if not online_judge else ""
+	precompile_link = "" # clang
+	# precompile_link = "-I/usr/include -L/usr/lib" # gcc
+	precompile_template = "-I{0}".format(sol.judge_path) if not online_judge else ""
 	extra_flag = "" # http://codeforces.com/blog/entry/15547
-	stack_size = "-Wl,-stack_size,0x10000000"
+	stack_size = "-Wl,-stack_size,0x10000000" # clang
+	# stack_size = "-Wl,--stack=0x10000000" # gcc
 	define_symbol = "-DHHHDEBUG" if not online_judge else ""
 	output_binary = "-o {0}".format(sol.binary)
 	input_sources = "{0}".format(sol.source)
@@ -65,6 +71,8 @@ def compile_sol(sol, online_judge, standard, verbose):
 	# stderr
 	# check_returncode()
 
+	# print(online_judge)
+	# print("define_symbol: {0}".format(define_symbol))
 	# print(full_command)
 	# print(completed.returncode)
 
@@ -83,19 +91,25 @@ def run_sol(sol, input_sources, output_dest, verbose):
 	# https://docs.python.org/3/library/subprocess.html
 	# 
 
+	STDIN = "stdin"
+	STDOUT = "stdout"
+
 	if input_sources is None:
 		input_sources = []
-		input_sources.append(sol.default_input)
+		if fexist(sol.default_input):
+			input_sources.append(sol.default_input)
+		else:
+			input_sources.append(STDIN)
 	else:
-		input_sources = ["{0}/{1}".format(sol.cwd, input_source) if input_source != "stdin" else "stdin" for input_source in input_sources]
+		input_sources = ["{0}/{1}".format(sol.cwd, input_source) if input_source != STDIN else STDIN for input_source in input_sources]
 	
 	# print("input_sources:")
 	# print(input_sources)
 
 	if output_dest is None:
-		output_dest = "stdout"
+		output_dest = STDOUT
 	else:
-		if output_dest != "stdout":
+		if output_dest != STDOUT:
 			output_dest = "{0}/{1}".format(sol.cwd, output_dest)
 			if fexist(output_dest):
 				fdelete(output_dest)
@@ -109,40 +123,13 @@ def run_sol(sol, input_sources, output_dest, verbose):
 	# http://stackoverflow.com/questions/10363853/reading-writing-to-a-popen-subprocess
 	# http://stackoverflow.com/questions/18344932/python-subprocess-call-stdout-to-file-stderr-to-file-display-stderr-on-scree
 	# http://stackoverflow.com/questions/89228/calling-an-external-command-in-python
-	# 
-	# output_dest_pipe = subprocess.PIPE
-	# if output_dest != "stdout":
-	# 	output_dest = "{0}/{1}".format(sol.cwd, output_dest)
-	# 	output_dest_pipe = open(output_dest, "a")
-
-	# for each in input_sources:
-	# 	input_source_pipe = subprocess.PIPE
-	# 	if each != "stdin":
-	# 		input_source = "{0}/{1}".format(sol.cwd, each)
-	# 		input_source_pipe = open(input_source, "r")
-		
-	# 	completed = subprocess.run(full_command, stdin=input_source_pipe, input=None, stdout=output_dest_pipe, stderr=subprocess.STDOUT, shell=True, timeout=None, check=False)
-
-
-	# 	try:
-	# 	    input_source_pipe.close()
-	# 	    print("input_source_pipe can close")
-	# 	except AttributeError:
-	# 		print("input_source_pipe cannot close")
-	# 		pass
-	# try:
-	#     output_dest_pipe.close()
-	#     print("output_dest_pipe can close")
-	# except AttributeError:
-	# 	print("output_dest_pipe cannot close")
-	# 	pass
 
 	for ieach in range(0, len(input_sources)):
 		each = input_sources[ieach]
 		this_command = full_command
-		if each != "stdin":
+		if each != STDIN:
 			this_command += " < {0}".format(each)
-		if output_dest != "stdout":
+		if output_dest != STDOUT:
 			this_command += " >> {0}".format(output_dest)
 
 		# print("full_command:\n{0}".format(full_command))
@@ -155,7 +142,7 @@ def run_sol(sol, input_sources, output_dest, verbose):
 
 		delimiter = "----{0}------------------------------".format(" Time: {0:4.0f} ms ".format(time_used) if verbose else "---------------")
 		if verbose or ieach	!= len(input_sources) - 1:
-			if output_dest == "stdout":
+			if output_dest == STDOUT:
 				print(delimiter)
 			else:
 				with open(output_dest, "a") as output_dest_f:
@@ -177,7 +164,7 @@ def cleanup_sol(sol):
 
 def template_exist(sol):
 	# print("template_exist")
-	exist = fexist(sol.template_header)
+	exist = fexist(sol.template_header) and fexist(sol.template_source)
 	return exist
 
 
@@ -199,7 +186,8 @@ def solution_exist(sol):
 def create_sol(sol):
 	# print("create_sol")
 
-	download(sol.template_source_url, sol.source)
+	# download(sol.template_source_url, sol.source)
+	fcopy(sol.template_source, sol.source)
 	fcreate(sol.default_input)
 	# fcreate(sol.default_output)
 
@@ -229,8 +217,8 @@ def open_sol(sol):
 def init_SOL(sol_name):
 	TEMPLATE_ENABLE = True
 	TEMPLATE_NAME = "template"
-	TEMPLATE_HEADER_URL = "https://gist.githubusercontent.com/cly753/70b633d36bc9b32e81c8/raw/2c65661ba2eca59892c9006bcca82ce191e857a2/template.h"
-	TEMPLATE_SOURCE_URL = "https://gist.githubusercontent.com/cly753/fdc989edc770c8c16e88/raw/d52bc75e21c207a82f7a1897f1b19ba423201bdc/template.cpp"
+	# TEMPLATE_HEADER_URL = "https://gist.githubusercontent.com/cly753/70b633d36bc9b32e81c8/raw/2c65661ba2eca59892c9006bcca82ce191e857a2/template.h"
+	# TEMPLATE_SOURCE_URL = "https://gist.githubusercontent.com/cly753/fdc989edc770c8c16e88/raw/d52bc75e21c207a82f7a1897f1b19ba423201bdc/template.cpp"
 
 	APPLICATION = "subl"
 	
@@ -253,13 +241,17 @@ def init_SOL(sol_name):
 	SOL.default_output = "{0}/{1}.output".format(CWD, sol_name)
 	SOL.template_enable = TEMPLATE_ENABLE
 	SOL.template = TEMPLATE_NAME
-	SOL.template_header = "{0}/{1}.h".format(JUDGE_PATH, SOL.template)
-	SOL.template_header_url = TEMPLATE_HEADER_URL
-	SOL.template_source_url = TEMPLATE_SOURCE_URL
+	SOL.template_header = "{0}/{1}.h".format(SOL.judge_path, SOL.template)
+	SOL.template_source = "{0}/{1}.cpp".format(SOL.judge_path, SOL.template)
+	# SOL.template_header_url = TEMPLATE_HEADER_URL
+	# SOL.template_source_url = TEMPLATE_SOURCE_URL
 	SOL.application = APPLICATION
 
 	if not template_exist(SOL):
-		download(SOL.template_header_url, SOL.template_header)
+		print("[ERROR] template header not found at \n{0}\n{1}".format(SOL.template_header, SOL.template_source))
+		exit(0)
+	# if not template_exist(SOL):
+	# 	download(SOL.template_header_url, SOL.template_header)
 	return SOL
 
 
@@ -320,7 +312,7 @@ def run_solution(args):
 	# pprint(args.o)
 	# pprint(args.oj)
 
-	compile_success = compile_sol(sol, args.oj, args.s, args.verbose)
+	compile_success = compile_sol(sol, args.online_judge, args.std, args.verbose)
 	if not compile_success:
 		print("[ERROR] Compilation Error.")
 	else:
@@ -410,8 +402,8 @@ def get_args():
 	run_parser.add_argument("-i", type=str, nargs="+", help="specify input sources (stdin case_1.in ...)")
 	run_parser.add_argument("-o", type=str, help="specify output destination (stdout / case_1.out / ...)")
 	run_parser.add_argument("-v", "--verbose", action="store_true", help="show verbose output")
-	run_parser.add_argument("--oj", "--online_judge", action="store_true", help="run solution as online judge")
-	run_parser.add_argument("-s", "-std", type=str, help="specify c++ standard")
+	run_parser.add_argument("-oj", "--online_judge", action="store_true", help="run solution as online judge")
+	run_parser.add_argument("-std", type=str, help="specify c++ standard")
 	run_parser.set_defaults(func=run_solution)
 
 
