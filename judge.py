@@ -52,7 +52,7 @@ def compile_sol(sol, online_judge, standard, verbose):
 	precompile_link = "" # clang
 	# precompile_link = "-I/usr/include -L/usr/lib" # gcc
 	precompile_template = "-I{0}".format(sol.judge_path) if not online_judge else ""
-	extra_flag = "" # http://codeforces.com/blog/entry/15547
+	extra_flag = "-Wall -Wshadow -Wformat=2 -Wfloat-equal" if True else "-Wall -Wextra -O2 -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_FORTIFY_SOURCE=2 -fsanitize=address -fno-sanitize-recover -pedantic" # http://codeforces.com/blog/entry/15547
 	stack_size = "-Wl,-stack_size,0x10000000" # clang
 	# stack_size = "-Wl,--stack=0x10000000" # gcc
 	define_symbol = "-DHHHDEBUG" if not online_judge else ""
