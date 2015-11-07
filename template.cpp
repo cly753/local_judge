@@ -17,8 +17,8 @@
 
 #define SHOW(...) {;}
 #define REACH_HERE {;}
-#define LOG(s, ...) {;}
-#define LOGLN(s, ...) {;}
+#define PRINT(s, ...) {;}
+#define PRINTLN(s, ...) {;}
 
 // #undef HHHDEBUG
 #ifdef HHHDEBUG
