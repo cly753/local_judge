@@ -64,6 +64,7 @@ def compile_sol(sol, online_judge, standard, verbose):
 	
 
 	completed = subprocess.run(full_command, stdin=None, input=None, stdout=None, stderr=None, shell=True, timeout=None, check=False)
+
 	# class subprocess.CompletedProcess
 	# args
 	# returncode
@@ -136,7 +137,12 @@ def run_sol(sol, input_sources, output_dest, verbose):
 		# print("this_command:\n{0}".format(this_command))
 		
 		time_start = time.perf_counter()
-		completed = subprocess.run(this_command, stdin=None, input=None, stdout=None, stderr=None, shell=True, timeout=None, check=False)
+		try:
+			completed = subprocess.run(this_command, stdin=None, input=None, stdout=None, stderr=None, shell=True, timeout=None, check=False)
+		except KeyboardInterrupt:
+			print("KeyboardInterrupt")
+			exit(0)
+
 		time_end = time.perf_counter()
 		time_used = (time_end - time_start) * 1000
 
