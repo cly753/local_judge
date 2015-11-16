@@ -141,7 +141,7 @@ def run_sol(sol, input_sources, output_dest, verbose):
 			completed = subprocess.run(this_command, stdin=None, input=None, stdout=None, stderr=None, shell=True, timeout=None, check=False)
 		except KeyboardInterrupt:
 			print("KeyboardInterrupt")
-			exit(0)
+			return True
 
 		time_end = time.perf_counter()
 		time_used = (time_end - time_start) * 1000
