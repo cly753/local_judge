@@ -27,8 +27,6 @@
 
 using namespace std;
 
-const int HH = 1e5 * 1 + 4;
-
 
 
 
