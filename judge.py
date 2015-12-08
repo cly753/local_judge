@@ -48,7 +48,7 @@ def compile_sol(sol, online_judge, standard, verbose):
 	compiler = "g++" # clang
 	# compiler = "g++-5" # gcc
 	standard = "-std=c++11" if standard is None else "-std={0}".format(standard)
-	optimizer = "-O2"
+	optimizer = "-O2" if True else ""
 	precompile_link = "" # clang
 	# precompile_link = "-I/usr/include -L/usr/lib" # gcc
 	precompile_template = "-I{0}".format(sol.judge_path) if not online_judge else ""
