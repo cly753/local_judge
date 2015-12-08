@@ -29,6 +29,9 @@
 
 using namespace std;
 
+const double E = 1e-8;
+const double PI = acos(-1);
+
 
 
 
