@@ -12,9 +12,9 @@
 #include <deque>
 #include <bitset>
 #include <set>
-// #include <unordered_set>
+#include <unordered_set>
 #include <map>
-// #include <unordered_map>
+#include <unordered_map>
 #include <cassert>
 
 #define SHOW(...) {;}
@@ -28,6 +28,9 @@
 #endif
 
 using namespace std;
+
+template<typename T>
+using Grid = vector<vector<T>>;
 
 const double E = 1e-8;
 const double PI = acos(-1);
